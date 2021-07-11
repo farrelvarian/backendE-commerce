@@ -1,0 +1,151 @@
+const productModel = require('../models/products')
+const helpers = require('../helpers/helpers')
+
+const getAllProduct = (req, res, next) => {
+  let numRows
+  const numPerPage = parseInt(req.query.npp) || 1
+  const page = parseInt(req.query.page) || 0
+  let numPages
+  const skip = page * numPerPage
+  // Here we compute the LIMIT parameter for MySQL query
+  const limit = skip + ',' + numPerPage
+  productModel.paginationProduct(numPerPage, page).then((result) => {
+    numRows = result[0].numRows
+    numPages = Math.ceil(numRows / numPerPage)
+    console.log('number per pages:', numPerPage)
+    console.log('number of pages:', numPages)
+  })
+  const field = req.query.field || 'id'
+  const sort = req.query.sort || 'ASC'
+  paramSearch = req.query.search || ''
+  let search = `WHERE ${field} LIKE '%${paramSearch}%'`
+  if (search != 'WHERE id LIKE \'%%\'') {
+    search = `WHERE ${field} LIKE '%${paramSearch}%'`
+  } else {
+    search = ''
+  }
+  console.log(search)
+  productModel
+    .getAllProduct(field, sort, limit, search)
+    .then((result) => {
+      const responsePayload = {
+        result: result
+      }
+      if (page < numPages) {
+        responsePayload.pagination = {
+          current: page,
+          perPage: numPerPage,
+          previous: page > 0 ? page - 1 : undefined,
+          next: page < numPages - 1 ? page + 1 : undefined,
+          sortBy: field,
+          orderBy: sort
+        }
+      } else {
+        responsePayload.pagination = {
+          err: 'queried page ' +
+                        page +
+                        ' is >= to maximum page number ' +
+                        numPages
+        }
+      }
+      helpers.response(res, responsePayload, 200)
+    })
+    .catch((error) => {
+      console.log(error)
+      helpers.response(res, null, 500, {
+        message: 'internal server error'
+      })
+    })
+}
+
+const getProduct = (req, res, next) => {
+  const id = req.params.id
+  productModel
+    .getProduct(id)
+    .then((result) => {
+      const products = result
+      helpers.response(res, products, 200)
+    })
+    .catch((error) => {
+      console.log(error)
+      helpers.response(res, null, 500, {
+        message: 'internal server error'
+      })
+    })
+}
+
+const insertProduct = (req, res, next) => {
+  const { name, brand, price, description, category_id, category, image } =
+    req.body
+  const data = {
+    name: name,
+    brand: brand,
+    price: price,
+    description: description,
+    category_id: category_id,
+    category: category,
+    image: image,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+
+  productModel
+    .insertProduct(data)
+    .then(() => {
+      helpers.response(res, data, 200)
+    })
+    .catch((error) => {
+      console.log(error)
+      helpers.response(res, null, 500, {
+        message: 'internal server error'
+      })
+    })
+}
+const updateProduct = (req, res) => {
+  const id = req.params.id
+  const { name, brand, price, description, category_id, category, image } =
+    req.body
+  const data = {
+    name: name,
+    brand: brand,
+    price: price,
+    description: description,
+    category_id: category_id,
+    category: category,
+    image: image,
+    updatedAt: new Date()
+  }
+  productModel
+    .updateProduct(id, data)
+    .then(() => {
+      helpers.response(res, data, 200)
+    })
+    .catch((error) => {
+      console.log(error)
+      helpers.response(res, null, 500, {
+        message: 'internal server error'
+      })
+    })
+}
+const deleteProduct = (req, res) => {
+  const id = req.params.id
+  productModel
+    .deleteProduct(id)
+    .then(() => {
+      helpers.response(res, data, 200)
+    })
+    .catch((err) => {
+      console.log(err)
+      helpers.response(res, null, 500, {
+        message: 'internal server error'
+      })
+    })
+}
+
+module.exports = {
+  getAllProduct,
+  getProduct,
+  insertProduct,
+  updateProduct,
+  deleteProduct
+}
