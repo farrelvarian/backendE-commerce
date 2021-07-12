@@ -3,7 +3,7 @@ const helpers = require("../helpers/helpers");
 
 const getAllProduct = (req, res, next) => {
     var numRows;
-    var numPerPage = parseInt(req.query.npp) || 1;
+    var numPerPage = parseInt(req.query.npp) || 5;
     var page = parseInt(req.query.page) || 0;
     var numPages;
     var skip = page * numPerPage;
@@ -47,13 +47,11 @@ const getAllProduct = (req, res, next) => {
                         " is >= to maximum page number " +
                         numPages,
                 };
-            helpers.response(res, responsePayload, 200);
+            helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found product", null, 404);
         });
 };
 
@@ -63,13 +61,11 @@ const getProduct = (req, res, next) => {
         .getProduct(id)
         .then((result) => {
             const products = result;
-            helpers.response(res, products, 200);
+            helpers.response(res, "Success get data", products, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id product", null, 404);
         });
 };
 
@@ -91,13 +87,11 @@ const insertProduct = (req, res, next) => {
     productModel
         .insertProduct(data)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success insert data", data, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id product", null, 404);
         });
 };
 const updateProduct = (req, res) => {
@@ -117,13 +111,11 @@ const updateProduct = (req, res) => {
     productModel
         .updateProduct(id, data)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success update data", data, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id product", null, 404);
         });
 };
 const deleteProduct = (req, res) => {
@@ -131,13 +123,11 @@ const deleteProduct = (req, res) => {
     productModel
         .deleteProduct(id)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success delete data", data, 200);
         })
         .catch((err) => {
             console.log(err);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id product", null, 404);
         });
 };
 

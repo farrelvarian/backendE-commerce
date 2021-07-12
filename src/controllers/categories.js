@@ -48,13 +48,11 @@ const getAllCategory = (req, res, next) => {
                         numPages,
                 };
             }
-            helpers.response(res, responsePayload, 200);
+            helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found category", null, 404);
         });
 };
 
@@ -64,13 +62,11 @@ const getCategory = (req, res, next) => {
         .getCategory(id)
         .then((result) => {
             const categories = result;
-            helpers.response(res, categories, 200);
+            helpers.response(res, "Success get data", categories, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id category", null, 404);
         });
 };
 
@@ -85,13 +81,11 @@ const insertCategory = (req, res, next) => {
     categoryModel
         .insertCategory(data)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success insert data", categories, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id category", null, 404);
         });
 };
 
@@ -105,13 +99,11 @@ const updateCategory = (req, res) => {
     categoryModel
         .updateCategory(id, data)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success update data", data, 200);
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id category", null, 404);
         });
 };
 
@@ -120,13 +112,11 @@ const deleteCategory = (req, res) => {
     categoryModel
         .deleteCategory(id)
         .then(() => {
-            helpers.response(res, data, 200);
+            helpers.response(res, "Success delete data", data, 200);
         })
         .catch((err) => {
             console.log(err);
-            helpers.response(res, null, 500, {
-                message: "internal server error",
-            });
+            helpers.response(res, "Not found id category", null, 404);
         });
 };
 
