@@ -25,6 +25,11 @@ app.use("/categories", categoryRouter);
 app.use("/orders", orderRouter);
 app.use("/payments", paymentRouter);
 
+app.use("*", (req, res, next) => {
+    const error = new createError.NotFound();
+    next(error);
+});
+
 app.use((err, req, res, next) => {
     console.error(err);
     res.status(err.status || 500).json({
