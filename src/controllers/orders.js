@@ -24,7 +24,8 @@ const getOrder = (req, res, next) => {
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, "Not found id order", null, 404);
+            const err = new createError.InternalServerError();
+            next(err);
         });
 };
 

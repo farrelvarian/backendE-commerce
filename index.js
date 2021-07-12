@@ -10,6 +10,7 @@ const paymentRouter = require("./src/routes/payments");
 const morgan = require("morgan");
 const port = process.env.DB_PORT || 3500;
 const cors = require("cors");
+const createError = require("http-errors");
 
 // middleware
 
@@ -23,6 +24,13 @@ app.use("/users", userRouter);
 app.use("/categories", categoryRouter);
 app.use("/orders", orderRouter);
 app.use("/payments", paymentRouter);
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(err.status || 500).json({
+        message: err.message || "internal server Error",
+    });
+});
 
 app.listen(port, () => {
     console.log(`server is running on port ${port}`);

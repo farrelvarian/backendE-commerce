@@ -12,6 +12,22 @@ const getAllUser = () => {
     });
 };
 
+const getUser = (id) => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            "SELECT * FROM users  WHERE id = ?",
+            id,
+            (error, result) => {
+                if (!error) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        );
+    });
+};
+
 const insertUser = (data) => {
     return new Promise((resolve, reject) => {
         connection.query("INSERT INTO users SET ?", data, (error, result) => {
@@ -53,6 +69,7 @@ const deleteUser = (id) => {
 
 module.exports = {
     getAllUser,
+    getUser,
     insertUser,
     updateUser,
     deleteUser,

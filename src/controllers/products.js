@@ -1,5 +1,6 @@
 const productModel = require("../models/products");
 const helpers = require("../helpers/helpers");
+const createError = require("http-errors");
 
 const getAllProduct = (req, res, next) => {
     var numRows;
@@ -65,7 +66,8 @@ const getProduct = (req, res, next) => {
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, "Not found id product", null, 404);
+            const err = new createError.InternalServerError();
+            next(err);
         });
 };
 

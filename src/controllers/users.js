@@ -11,7 +11,22 @@ const getAllUser = (req, res, next) => {
         })
         .catch((error) => {
             console.log(error);
-            helpers.response(res, "Not found product", null, 404);
+            helpers.response(res, "Not found user", null, 404);
+        });
+};
+
+const getUser = (req, res, next) => {
+    const id = req.params.id;
+    userModel
+        .getUser(id)
+        .then((result) => {
+            const users = result;
+            helpers.response(res, "Success get data", users, 200);
+        })
+        .catch((error) => {
+            console.log(error);
+            const err = new createError.InternalServerError();
+            next(err);
         });
 };
 
@@ -82,6 +97,7 @@ const deleteUser = (req, res) => {
 
 module.exports = {
     getAllUser,
+    getUser,
     insertUser,
     updateUser,
     deleteUser,
