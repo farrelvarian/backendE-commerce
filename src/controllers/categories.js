@@ -112,7 +112,7 @@ const deleteCategory = (req, res) => {
     categoryModel
         .deleteCategory(id)
         .then(() => {
-            helpers.response(res, "Success delete data", data, 200);
+            helpers.response(res, "Success delete data", id, 200);
         })
         .catch((err) => {
             console.log(err);
