@@ -18,11 +18,11 @@ const getAllCategory = (req, res, next) => {
     const field = req.query.field || "name";
     const sort = req.query.sort || "ASC";
     paramSearch = req.query.search || "";
-    let search = `WHERE products.${field} LIKE '%${paramSearch}%'`;
-    if (search != "WHERE products.name LIKE '%%'") {
-        search = `WHERE products.${field} LIKE '%${paramSearch}%'`;
+    let search = `WHERE categories.${field} LIKE '%${paramSearch}%'`;
+    if (search != "WHERE categories.name LIKE '%%'") {
+      search = `WHERE categories.${field} LIKE '%${paramSearch}%'`;
     } else {
-        search = "";
+      search = "";
     }
     console.log(search);
     categoryModel
