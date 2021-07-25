@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const productRouter = require('./src/routes/products')
-    // const userRouter = require('./src/routes/users')
+const userRouter = require('./src/routes/users')
 const categoryRouter = require('./src/routes/categories')
 const orderRouter = require('./src/routes/orders')
 const paymentRouter = require('./src/routes/payments')
@@ -21,11 +21,11 @@ app.use(morgan('dev'))
 app.use(cors())
 
 app.use('/products', productRouter)
-    // app.use('/users', userRouter)
+app.use('/users', userRouter)
 app.use('/categories', categoryRouter)
 app.use('/orders', orderRouter)
 app.use('/payments', paymentRouter)
-app.use("/users", userAuthRouter);
+app.use("/", userAuthRouter);
 app.use("/files", express.static("./uploads"));
 
 app.use('*', (req, res, next) => {

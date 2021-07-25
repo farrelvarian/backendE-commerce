@@ -26,6 +26,7 @@ const findUser = (email) => {
         );
     });
 };
+
 module.exports = {
     insertUser,
     findUser,

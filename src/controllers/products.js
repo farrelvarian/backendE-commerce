@@ -4,6 +4,8 @@ const fs = require("fs");
 const path = require("path");
 const createError = require("http-errors");
 const dirPath = path.join(__dirname, "../../uploads");
+const redis = require("redis");
+const client = redis.createClient();
 
 const getAllProduct = (req, res, next) => {
     let numRows;

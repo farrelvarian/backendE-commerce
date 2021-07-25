@@ -29,6 +29,20 @@ const getAllProduct = (field, sort, limit, search) => {
         );
     });
 };
+const getAllProductForRedis = (field, sort, limit, search) => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            `SELECT * FROM products`,
+            (error, result) => {
+                if (!error) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            }
+        );
+    });
+};
 
 const getProduct = (id) => {
     return new Promise((resolve, reject) => {
@@ -123,6 +137,7 @@ const deleteProduct = (id) => {
 module.exports = {
     paginationProduct,
     getAllProduct,
+    getAllProductForRedis,
     getProduct,
     getImageProduct,
     getProductByCategory,

@@ -7,12 +7,12 @@ const jwt = require("jsonwebtoken");
 
 const register = async(req, res, next) => {
 
-    const { name, email, password, phone, gender, dateOfBirth, address } =
+    const { name, email, password, phone, gender, dateOfBirth, role, address } =
     req.body;
 
     const user = await userModels.findUser(email);
     if (user.length > 0) {
-        return helpers.response(res, null, 401, { message: "email sudah ada" });
+        return helpers.response(res, "email sudah ada", null, 401);
     }
     console.log(user);
     bcrypt.genSalt(10, function(err, salt) {
@@ -28,6 +28,7 @@ const register = async(req, res, next) => {
                 gender: gender,
                 dateOfBirth: dateOfBirth,
                 address: address,
+                role: role,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -36,14 +37,11 @@ const register = async(req, res, next) => {
                 .insertUser(data)
                 .then((result) => {
                     delete data.password;
-
-                    helpers.response(res, data, 200);
+                    helpers.response(res, "Success register", data, 200);
                 })
                 .catch((error) => {
                     console.log(error);
-                    helpers.response(res, null, 500, {
-                        message: "internal server error",
-                    });
+                    helpers.response(res, "error register", null, 500);
                 });
         });
     });
@@ -53,19 +51,34 @@ const login = async(req, res, next) => {
     const { email, password } = req.body;
     const result = await userModels.findUser(email);
     const user = result[0];
+    const role = user.role
+    let roleUser
+    switch (role) {
+        case "CUSTOMMER":
+            roleUser = "1";
+            break;
+        case "SELLER":
+            roleUser = "2";
+            break;
+        case "ADMIN":
+            roleUser = "3";
+    }
+
     bcrypt.compare(password, user.password, function(err, resCompare) {
         if (!resCompare) {
-            return helpers.response(res, null, 401, { message: "password wrong" });
+            return helpers.response(res, "password wrong", null, 401);
         }
+
         // generate token
-        jwt.sign({ email: user.email, role: "1" },
+        jwt.sign({ email: user.email, role: roleUser },
             process.env.SECRET_KEY, { expiresIn: "24h" },
             function(err, token) {
                 console.log(token);
                 console.log(process.env.SECRET_KEY);
                 delete user.password;
                 user.token = token;
-                helpers.response(res, user, 200);
+                helpers.response(res, "success login",
+                    user, 200);
             }
         );
     });
