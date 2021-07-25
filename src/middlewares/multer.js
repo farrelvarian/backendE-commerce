@@ -1,5 +1,6 @@
 const multer = require("multer");
-const maxSize = 1 * 1024 * 1024; // for 1MB
+const maxSize = 5 * 1024 * 1024; // for 5MB
+
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
 
@@ -20,10 +21,12 @@ const upload = multer({
             cb(null, true);
         } else {
             cb(null, false);
+
             return cb(new Error("Only .png, .jpg and .jpeg format allowed!"));
         }
     },
     limits: { fileSize: maxSize },
+
 });
 
 

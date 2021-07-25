@@ -3,7 +3,7 @@ const helpers = require("../helpers/helpers");
 const fs = require("fs");
 const path = require("path");
 const createError = require("http-errors");
-const { log } = require("console");
+const dirPath = path.join(__dirname, "../../uploads");
 
 const getAllProduct = (req, res, next) => {
     let numRows;
@@ -20,8 +20,8 @@ const getAllProduct = (req, res, next) => {
     } else {
         search = "";
     }
-    let searchPage = search
-        // Here we compute the LIMIT parameter for MySQL query
+    let searchPage = search;
+    // Here we compute the LIMIT parameter for MySQL query
     const limit = skip + "," + numPerPage;
     productModel
         .paginationProduct(numPerPage, page, searchPage)
@@ -100,6 +100,16 @@ const getProductByCategory = (req, res, next) => {
 };
 
 const insertProduct = (req, res, next) => {
+    const urlImages = [];
+    const images = [];
+    req.files.forEach((element) => {
+        const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
+        const filename = element.filename;
+        urlImages.push(urlFileName);
+        images.push(filename);
+    });
+    const urlImagesString = urlImages.toString();
+
     const { name, brand, price, description, category_id, category, image } =
     req.body;
     const data = {
@@ -109,7 +119,7 @@ const insertProduct = (req, res, next) => {
         description: description,
         category_id: category_id,
         category: category,
-        image: `${process.env.BASE_URL}/files/${req.file.filename}`,
+        image: urlImagesString,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -117,17 +127,39 @@ const insertProduct = (req, res, next) => {
     productModel
         .insertProduct(data)
         .then(() => {
-
             helpers.response(res, "Success insert data", data, 200);
         })
         .catch((error) => {
-
             console.log(error);
             helpers.response(res, "Not found id product", null, 404);
+            for (var i = 0; i < images.length; i++) {
+                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                    if (err) {
+                        console.log("Error unlink image product!" + err);
+                    }
+                });
+            }
         });
 };
 const updateProduct = (req, res) => {
     const id = req.params.id;
+    var myArr = []
+    productModel.getImageProduct(id).then((result) => {
+        const productsImage = result[0].image;
+        myArr = productsImage.split(",")
+        console.log(myArr);
+    });
+
+    const urlImages = [];
+    const images = [];
+    req.files.forEach((element) => {
+        const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
+        const filename = element.filename;
+        urlImages.push(urlFileName);
+        images.push(filename);
+    });
+    const urlImagesString = urlImages.toString();
+
     const { name, brand, price, description, category_id, category, image } =
     req.body;
     const data = {
@@ -137,12 +169,20 @@ const updateProduct = (req, res) => {
         description: description,
         category_id: category_id,
         category: category,
-        image: `${process.env.BASE_URL}/file/${req.file.filename}`,
+        image: urlImagesString,
         updatedAt: new Date(),
     };
     productModel
         .updateProduct(id, data)
         .then(() => {
+            for (var i = 0; i < myArr.length; i++) {
+                fs.unlink(`${dirPath}/${myArr[i].substr(28)}`, (err) => {
+                    if (err) {
+                        console.log("Error unlink image product!" + err);
+                    }
+                });
+            }
+
             helpers.response(res, "Success update data", data, 200);
         })
         .catch((error) => {
@@ -160,6 +200,13 @@ const deleteProduct = (req, res) => {
         .catch((err) => {
             console.log(err);
             helpers.response(res, "Not found id product", null, 404);
+            for (var i = 0; i < images.length; i++) {
+                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                    if (err) {
+                        console.log("Error unlink image product!" + err);
+                    }
+                });
+            }
         });
 };
 
