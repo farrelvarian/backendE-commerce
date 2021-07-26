@@ -61,6 +61,11 @@ const getAllProduct = (req, res, next) => {
                         numPages,
                 };
             }
+            client.setex(
+                `products/${numPerPage}/${page}/${sort}/${paramSearch}`,
+                60 * 60,
+                JSON.stringify(responsePayload)
+            );
             helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
@@ -75,6 +80,7 @@ const getProduct = (req, res, next) => {
         .getProduct(id)
         .then((result) => {
             const products = result;
+            client.setex(`product/${id}`, 60 * 60, JSON.stringify(products));
             helpers.response(res, "Success get data", products, 200);
         })
         .catch((error) => {
