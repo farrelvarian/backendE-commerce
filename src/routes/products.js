@@ -13,15 +13,22 @@ router
         redisCache.hitCacheProductId,
         productController.getProduct
     )
-    .get("/category/:category_id", productController.getProductByCategory)
+    .get(
+        "/category/:category_id",
+        redisCache.hitCacheProductCategory,
+        productController.getProductByCategory
+    )
     .post(
         "/",
-        auth.verifyAccess, redisCache.clearRedisProduct, upload.array("images", 5),
+        auth.verifyAccess,
+        redisCache.clearRedisProduct,
+        upload.array("images", 5),
         productController.insertProduct
     )
     .put(
         "/:id",
-        auth.verifyAccess, redisCache.clearRedisProduct,
+        auth.verifyAccess,
+        redisCache.clearRedisProduct,
         upload.array("images", 5),
         productController.updateProduct
     )

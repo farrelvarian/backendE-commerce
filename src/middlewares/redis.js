@@ -34,6 +34,21 @@ const hitCacheProductId = (req, res, next) => {
         }
     });
 };
+const hitCacheProductCategory = (req, res, next) => {
+    const category_id = req.params.category_id;
+    const field = req.query.field || "name";
+    const sort = req.query.sort || "ASC";
+    client.get(`products/${category_id}/${field}/${sort}`, function(err, data) {
+        // reply is null when the key is missing
+        if (data !== null) {
+            const result = JSON.parse(data);
+            console.log("data cache di hit");
+            return helpers.response(res, "Success get data", result, 200);
+        } else {
+            next();
+        }
+    });
+};
 const clearRedisProduct = (req, res, next) => {
     client.del("flushall");
     next();
@@ -41,5 +56,6 @@ const clearRedisProduct = (req, res, next) => {
 module.exports = {
     hitCacheAllProduct,
     hitCacheProductId,
+    hitCacheProductCategory,
     clearRedisProduct,
 };

@@ -51,7 +51,7 @@ const getAllProduct = (req, res, next) => {
                     next: page < numPages ? page + 1 : undefined,
                     sortBy: field,
                     orderBy: sort,
-                    search: search,
+                    search: paramSearch,
                 };
             } else {
                 responsePayload.pagination = {
@@ -75,19 +75,22 @@ const getAllProduct = (req, res, next) => {
 };
 
 const getProduct = (req, res, next) => {
-    const id = req.params.id;
-    productModel
-        .getProduct(id)
-        .then((result) => {
-            const products = result;
-            client.setex(`product/${id}`, 60 * 60, JSON.stringify(products));
-            helpers.response(res, "Success get data", products, 200);
-        })
-        .catch((error) => {
-            console.log(error);
-            const err = new createError.InternalServerError();
-            next(err);
-        });
+    if (req.role == 1 || req.role == 2 || req.role == 3) {
+        const id = req.params.id;
+        productModel
+            .getProduct(id)
+            .then((result) => {
+                const products = result;
+                client.setex(`product/${id}`, 60 * 60, JSON.stringify(products));
+                helpers.response(res, "Success get data", products, 200);
+            })
+            .catch((error) => {
+                console.log(error);
+                const err = new createError.InternalServerError();
+                next(err);
+            });
+    } else { helpers.response(res, "Not Autorized", null, 404); }
+
 };
 
 const getProductByCategory = (req, res, next) => {
@@ -98,6 +101,11 @@ const getProductByCategory = (req, res, next) => {
         .getProductByCategory(category_id, field, sort)
         .then((result) => {
             const products = result;
+            client.setex(
+                `product/${category_id}/${field}/${sort}`,
+                60 * 60,
+                JSON.stringify(products)
+            );
             helpers.response(res, "Success get data", products, 200);
         })
         .catch((error) => {
@@ -105,117 +113,137 @@ const getProductByCategory = (req, res, next) => {
             const err = new createError.InternalServerError();
             next(err);
         });
+
 };
 
 const insertProduct = (req, res, next) => {
-    const urlImages = [];
-    const images = [];
-    req.files.forEach((element) => {
-        const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
-        const filename = element.filename;
-        urlImages.push(urlFileName);
-        images.push(filename);
-    });
-    const urlImagesString = urlImages.toString();
-
-    const { name, brand, price, description, category_id, category, image } =
-    req.body;
-    const data = {
-        name: name,
-        brand: brand,
-        price: price,
-        description: description,
-        category_id: category_id,
-        category: category,
-        image: urlImagesString,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    };
-
-    productModel
-        .insertProduct(data)
-        .then(() => {
-            helpers.response(res, "Success insert data", data, 200);
-        })
-        .catch((error) => {
-            console.log(error);
-            helpers.response(res, "Not found id product", null, 404);
-            for (var i = 0; i < images.length; i++) {
-                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                    if (err) {
-                        console.log("Error unlink image product!" + err);
-                    }
-                });
-            }
+    if (req.role == 2) {
+        const urlImages = [];
+        const images = [];
+        req.files.forEach((element) => {
+            const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
+            const filename = element.filename;
+            urlImages.push(urlFileName);
+            images.push(filename);
         });
+        const urlImagesString = urlImages.toString();
+
+        const { name, brand, price, description, category_id, category, image } =
+        req.body;
+        const data = {
+            name: name,
+            brand: brand,
+            price: price,
+            description: description,
+            category_id: category_id,
+            category: category,
+            image: urlImagesString,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        productModel
+            .insertProduct(data)
+            .then(() => {
+                helpers.response(res, "Success insert data", data, 200);
+            })
+            .catch((error) => {
+                console.log(error);
+                helpers.response(res, "Not found id product", null, 404);
+                for (var i = 0; i < images.length; i++) {
+                    fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                        if (err) {
+                            console.log("Error unlink image product!" + err);
+                        }
+                    });
+                }
+            });
+    } else {
+        helpers.response(res, "Not Autorized", null, 404);
+    }
 };
 const updateProduct = (req, res) => {
-    const id = req.params.id;
-    var myArr = []
-    productModel.getImageProduct(id).then((result) => {
-        const productsImage = result[0].image;
-        myArr = productsImage.split(",")
-        console.log(myArr);
-    });
-
-    const urlImages = [];
-    const images = [];
-    req.files.forEach((element) => {
-        const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
-        const filename = element.filename;
-        urlImages.push(urlFileName);
-        images.push(filename);
-    });
-    const urlImagesString = urlImages.toString();
-
-    const { name, brand, price, description, category_id, category, image } =
-    req.body;
-    const data = {
-        name: name,
-        brand: brand,
-        price: price,
-        description: description,
-        category_id: category_id,
-        category: category,
-        image: urlImagesString,
-        updatedAt: new Date(),
-    };
-    productModel
-        .updateProduct(id, data)
-        .then(() => {
-            for (var i = 0; i < myArr.length; i++) {
-                fs.unlink(`${dirPath}/${myArr[i].substr(28)}`, (err) => {
-                    if (err) {
-                        console.log("Error unlink image product!" + err);
-                    }
-                });
-            }
-
-            helpers.response(res, "Success update data", data, 200);
-        })
-        .catch((error) => {
-            console.log(error);
-            helpers.response(res, "Not found id product", null, 404);
+    if (req.role == 2) {
+        const id = req.params.id;
+        var myArr = [];
+        productModel.getImageProduct(id).then((result) => {
+            const productsImage = result[0].image;
+            myArr = productsImage.split(",");
+            console.log(myArr);
         });
+
+        const urlImages = [];
+        const images = [];
+        req.files.forEach((element) => {
+            const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
+            const filename = element.filename;
+            urlImages.push(urlFileName);
+            images.push(filename);
+        });
+        const urlImagesString = urlImages.toString();
+
+        const {
+            name,
+            brand,
+            price,
+            description,
+            category_id,
+            category,
+            image,
+        } = req.body;
+        const data = {
+            name: name,
+            brand: brand,
+            price: price,
+            description: description,
+            category_id: category_id,
+            category: category,
+            image: urlImagesString,
+            updatedAt: new Date(),
+        };
+        productModel
+            .updateProduct(id, data)
+            .then(() => {
+                for (var i = 0; i < myArr.length; i++) {
+                    fs.unlink(`${dirPath}/${myArr[i].substr(28)}`, (err) => {
+                        if (err) {
+                            console.log("Error unlink image product!" + err);
+                        }
+                    });
+                }
+
+                helpers.response(res, "Success update data", data, 200);
+            })
+            .catch((error) => {
+                console.log(error);
+                helpers.response(res, "Not found id product", null, 404);
+            });
+    } else {
+        helpers.response(res, "Not Autorized", null, 404);
+    }
 };
 const deleteProduct = (req, res) => {
-    const id = req.params.id;
-    productModel
-        .deleteProduct(id)
-        .then(() => {
-            helpers.response(res, "Success delete data", id, 200);
-        })
-        .catch((err) => {
-            console.log(err);
-            helpers.response(res, "Not found id product", null, 404);
-            for (var i = 0; i < images.length; i++) {
-                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                    if (err) {
-                        console.log("Error unlink image product!" + err);
-                    }
-                });
-            }
-        });
+    if (req.role == 2) {
+        const id = req.params.id;
+        productModel
+            .deleteProduct(id)
+            .then(() => {
+                helpers.response(res, "Success delete data", id, 200);
+            })
+            .catch((err) => {
+                console.log(err);
+                helpers.response(res, "Not found id product", null, 404);
+                for (var i = 0; i < images.length; i++) {
+                    fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                        if (err) {
+                            console.log("Error unlink image product!" + err);
+                        }
+                    });
+                }
+            });
+    } else {
+        helpers.response(res, "Not Autorized", null, 404);
+    }
 };
 
 module.exports = {
