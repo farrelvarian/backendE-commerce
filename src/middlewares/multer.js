@@ -1,5 +1,5 @@
 const multer = require("multer");
-const maxSize = 5 * 1024 * 1024; // for 5MB
+const maxSize = 1 * 1024 * 1024; // for 1MB
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {

@@ -1,7 +1,7 @@
 const userModels = require("../models/userAuth");
 const { v4: uuidv4 } = require("uuid");
 const helpers = require("../helpers/helpers");
-const createError = require("http-errors");
+const common = require("../helpers/common");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -29,14 +29,17 @@ const register = async(req, res, next) => {
                 dateOfBirth: dateOfBirth,
                 address: address,
                 role: role,
+                status: 0,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
+
 
             userModels
                 .insertUser(data)
                 .then((result) => {
                     delete data.password;
+                    common.sendEmail(data.email)
                     helpers.response(res, "Success register", data, 200);
                 })
                 .catch((error) => {
