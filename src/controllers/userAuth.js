@@ -29,7 +29,7 @@ const register = async(req, res, next) => {
                 dateOfBirth: dateOfBirth,
                 address: address,
                 role: role,
-                status: 0,
+                status: "UNACTIVED",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             };
@@ -39,7 +39,13 @@ const register = async(req, res, next) => {
                 .insertUser(data)
                 .then((result) => {
                     delete data.password;
-                    common.sendEmail(data.email)
+                    jwt.sign({ email: data.email },
+                        process.env.SECRET_KEY, { expiresIn: "2h" },
+                        function(err, token) {
+                            console.log(token);
+                            common.sendEmail(data.email, data.name, token);
+                        }
+                    );
                     helpers.response(res, "Success register", data, 200);
                 })
                 .catch((error) => {
@@ -55,6 +61,7 @@ const login = async(req, res, next) => {
     const result = await userModels.findUser(email);
     const user = result[0];
     const role = user.role
+    const status = user.status;
     let roleUser
     switch (role) {
         case "CUSTOMMER":
@@ -66,27 +73,52 @@ const login = async(req, res, next) => {
         case "ADMIN":
             roleUser = "3";
     }
-
-    bcrypt.compare(password, user.password, function(err, resCompare) {
-        if (!resCompare) {
-            return helpers.response(res, "password wrong", null, 401);
-        }
-
-        // generate token
-        jwt.sign({ email: user.email, role: roleUser },
-            process.env.SECRET_KEY, { expiresIn: "24h" },
-            function(err, token) {
-                console.log(token);
-                console.log(process.env.SECRET_KEY);
-                delete user.password;
-                user.token = token;
-                helpers.response(res, "success login",
-                    user, 200);
+    if (status == "ACTIVED") {
+        bcrypt.compare(password, user.password, function(err, resCompare) {
+            if (!resCompare) {
+                return helpers.response(res, "password wrong", null, 401);
             }
-        );
+
+            // generate token
+            jwt.sign({ email: user.email, role: roleUser },
+                process.env.SECRET_KEY, { expiresIn: "24h" },
+                function(err, token) {
+                    console.log(token);
+                    console.log(process.env.SECRET_KEY);
+                    delete user.password;
+                    user.token = token;
+                    helpers.response(res, "success login", user, 200);
+                }
+            );
+        });
+    } else { return helpers.response(res, "account not actived", null, 401); }
+
+};
+
+const activation = (req, res, next) => {
+    const token = req.params.token;
+    if (!token) {
+        const error = new Error("server need token");
+        error.code = 401;
+        return next(error);
+    }
+    console.log(token);
+    jwt.verify(token, process.env.SECRET_KEY, function(err, decoded) {
+        if (err) {
+            helpers.response(res, "Activation failed", null, 401);
+        }
+        const email = decoded.email;
+        console.log(email);
+        userModels.activationUser(email)
+            .then(() => { helpers.response(res, "success change status", email, 200); })
+            .catch((error) => {
+                helpers.response(res, "failed change status", null, 401)
+            })
     });
 };
+
 module.exports = {
     register,
     login,
+    activation,
 };
