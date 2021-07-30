@@ -61,11 +61,8 @@ const getAllProduct = (req, res, next) => {
                         numPages,
                 };
             }
-            client.setex(
-                `products/${numPerPage}/${page}/${sort}/${paramSearch}`,
-                60 * 60,
-                JSON.stringify(responsePayload)
-            );
+            client.setex(`products/${numPerPage}/${page}/${sort}/${paramSearch}`, 60 * 60, JSON.stringify(responsePayload));
+            console.log("sdfsljfda;slsfkla;flkslk");
             helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
@@ -165,7 +162,7 @@ const insertProduct = (req, res, next) => {
 const updateProduct = (req, res) => {
     if (req.role == 2) {
         const id = req.params.id;
-        var myArr = [];
+        let myArr = [];
         productModel.getImageProduct(id).then((result) => {
             const productsImage = result[0].image;
             myArr = productsImage.split(",");
