@@ -18,79 +18,77 @@ const paginationProduct = (numPerPage, page, searchPage) => {
 const getAllProduct = (field, sort, limit, search) => {
     return new Promise((resolve, reject) => {
         connection.query(
-            `SELECT * FROM products ${search} ORDER BY ${field} ${sort} LIMIT ${limit} `,
-            (error, result) => {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
+          `SELECT * FROM products INNER JOIN images ON products.image_id=images.id ${search} ORDER BY ${field} ${sort} LIMIT ${limit} `,
+          (error, result) => {
+            if (!error) {
+              resolve(result);
+            } else {
+              reject(error);
             }
+          }
         );
     });
 };
-const getAllProductForRedis = (field, sort, limit, search) => {
-    return new Promise((resolve, reject) => {
-        connection.query(
-            `SELECT * FROM products`,
-            (error, result) => {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
-            }
-        );
-    });
-};
+
 
 const getProduct = (id) => {
     return new Promise((resolve, reject) => {
         connection.query(
-            "SELECT * FROM products  WHERE id = ?",
-            id,
-            (error, result) => {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
+          "SELECT * FROM products INNER JOIN images ON products.image_id=images.id WHERE id = ?",
+          id,
+          (error, result) => {
+            if (!error) {
+              resolve(result);
+            } else {
+              reject(error);
             }
+          }
         );
     });
 };
-const getImageProduct = (id) => {
-    return new Promise((resolve, reject) => {
-        connection.query(
-            "SELECT image FROM products  WHERE id = ?",
-            id,
-            (error, result) => {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
-            }
-        );
-    });
-};
+
 
 const getProductByCategory = (category_id, field, sort) => {
     return new Promise((resolve, reject) => {
         connection.query(
-            `SELECT * FROM products  WHERE category_id = ? ORDER BY ${field} ${sort}`,
-            category_id,
-            (error, result) => {
-                if (!error) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
+          `SELECT * FROM products INNER JOIN images ON products.image_id=images.id WHERE category_id = ? ORDER BY ${field} ${sort}`,
+          category_id,
+          (error, result) => {
+            if (!error) {
+              resolve(result);
+            } else {
+              reject(error);
             }
+          }
         );
     });
 };
-
+const insertImagesProduct = (dataImages) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO images SET ?", dataImages, (error, result) => {
+      if (!error) {
+        resolve(result);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
+const getImagesProductIdInsert = () => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT id FROM `images` order BY id DESC LIMIT 1",
+      
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
 const insertProduct = (data) => {
     return new Promise((resolve, reject) => {
         connection.query("INSERT INTO products SET ?", data, (error, result) => {
@@ -102,7 +100,50 @@ const insertProduct = (data) => {
         });
     });
 };
-
+const getImagesProductIdUpdate = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT image_id FROM `products` where id=?",id,
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
+const getImagesProduct = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT image1,image2,image3,image4,image5 FROM `images` WHERE id = ?",
+      id,
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
+const updateImagesProduct = (id, dataImages) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "UPDATE images SET ? WHERE id = ?",
+      [dataImages, id],
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
 const updateProduct = (id, data) => {
     return new Promise((resolve, reject) => {
         connection.query(
@@ -135,13 +176,16 @@ const deleteProduct = (id) => {
 };
 
 module.exports = {
-    paginationProduct,
-    getAllProduct,
-    getAllProductForRedis,
-    getProduct,
-    getImageProduct,
-    getProductByCategory,
-    insertProduct,
-    updateProduct,
-    deleteProduct,
+  paginationProduct,
+  getAllProduct,
+  getProduct,
+  getProductByCategory,
+  insertImagesProduct,
+  getImagesProductIdInsert,
+  getImagesProduct,
+  insertProduct,
+  getImagesProductIdUpdate,
+  updateImagesProduct,
+  updateProduct,
+  deleteProduct,
 };

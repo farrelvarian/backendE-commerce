@@ -61,8 +61,12 @@ const getAllProduct = (req, res, next) => {
                         numPages,
                 };
             }
-            client.setex(`products/${numPerPage}/${page}/${sort}/${paramSearch}`, 60 * 60, JSON.stringify(responsePayload));
-            console.log("sdfsljfda;slsfkla;flkslk");
+            client.setex(
+                `products/${numPerPage}/${page}/${sort}/${paramSearch}`,
+                60 * 60,
+                JSON.stringify(responsePayload)
+            );
+            // console.log("sdfsljfda;slsfkla;flkslk");
             helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
@@ -86,8 +90,9 @@ const getProduct = (req, res, next) => {
                 const err = new createError.InternalServerError();
                 next(err);
             });
-    } else { helpers.response(res, "Not Autorized", null, 404); }
-
+    } else {
+        helpers.response(res, "Not Autorized", null, 404);
+    }
 };
 
 const getProductByCategory = (req, res, next) => {
@@ -110,7 +115,6 @@ const getProductByCategory = (req, res, next) => {
             const err = new createError.InternalServerError();
             next(err);
         });
-
 };
 
 const insertProduct = (req, res, next) => {
@@ -123,38 +127,48 @@ const insertProduct = (req, res, next) => {
             urlImages.push(urlFileName);
             images.push(filename);
         });
-        const urlImagesString = urlImages.toString();
-
-        const { name, brand, price, description, category_id, category, image } =
-        req.body;
-        const data = {
-            name: name,
-            brand: brand,
-            price: price,
-            description: description,
-            category_id: category_id,
-            category: category,
-            image: urlImagesString,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+        const dataImages = {
+            image1: urlImages[0] || null,
+            image2: urlImages[1] || null,
+            image3: urlImages[2] || null,
+            image4: urlImages[3] || null,
+            image5: urlImages[4] || null,
         };
+        productModel.insertImagesProduct(dataImages).then(() => {
+            productModel.getImagesProductIdInsert().then((result) => {
+                const imageId = result[0].id;
+                const { name, brand, price, description, category_id, category } =
+                req.body;
+                const data = {
+                    name: name,
+                    brand: brand,
+                    price: price,
+                    description: description,
+                    category_id: category_id,
+                    category: category,
+                    image_id: imageId,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
 
-        productModel
-            .insertProduct(data)
-            .then(() => {
-                helpers.response(res, "Success insert data", data, 200);
-            })
-            .catch((error) => {
-                console.log(error);
-                helpers.response(res, "Not found id product", null, 404);
-                for (var i = 0; i < images.length; i++) {
-                    fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                        if (err) {
-                            console.log("Error unlink image product!" + err);
+                productModel
+                    .insertProduct(data)
+                    .then(() => {
+                        helpers.response(res, "Success insert data", data, 200);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        helpers.response(res, "Not found id product", null, 404);
+                        for (var i = 0; i < images.length; i++) {
+                            fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                                if (err) {
+                                    console.log("Error unlink image product!" + err);
+                                }
+                            });
                         }
                     });
-                }
             });
+        });
     } else {
         helpers.response(res, "Not Autorized", null, 404);
     }
@@ -162,13 +176,8 @@ const insertProduct = (req, res, next) => {
 const updateProduct = (req, res) => {
     if (req.role == 2) {
         const id = req.params.id;
-        let myArr = [];
-        productModel.getImageProduct(id).then((result) => {
-            const productsImage = result[0].image;
-            myArr = productsImage.split(",");
-            console.log(myArr);
-        });
 
+        const imageArr = [];
         const urlImages = [];
         const images = [];
         req.files.forEach((element) => {
@@ -177,44 +186,66 @@ const updateProduct = (req, res) => {
             urlImages.push(urlFileName);
             images.push(filename);
         });
-        const urlImagesString = urlImages.toString();
+        productModel.getImagesProductIdUpdate(id).then((result) => {
+            const imageId = result[0].image_id;
+            productModel.getImagesProduct(imageId).then((result) => {
+                // console.log(result[0].image1);
+                imageArr.push(result[0].image1);
+                imageArr.push(result[0].image2);
+                imageArr.push(result[0].image3);
+                imageArr.push(result[0].image4);
+                imageArr.push(result[0].image5);
+                // console.log(imageArr);
+                const dataImages = {
+                    image1: urlImages[0] || null,
+                    image2: urlImages[1] || null,
+                    image3: urlImages[2] || null,
+                    image4: urlImages[3] || null,
+                    image5: urlImages[4] || null,
+                };
+                productModel.updateImagesProduct(imageId, dataImages).then(() => {
+                    const { name, brand, price, description, category_id, category } =
+                    req.body;
+                    const data = {
+                        name: name,
+                        brand: brand,
+                        price: price,
+                        description: description,
+                        category_id: category_id,
+                        category: category,
+                        image_id: imageId,
+                        updatedAt: new Date(),
+                    };
+                    productModel
+                        .updateProduct(id, data)
+                        .then(() => {
+                            for (var i = 0; i < imageArr.length; i++) {
+                                fs.unlink(
+                                    `${dirPath}/${imageArr[i].substr(28)}`,
+                                    (err) => {
+                                        if (err) {
+                                            console.log("Error unlink image product!" + err);
+                                        }
+                                    }
+                                );
+                            }
 
-        const {
-            name,
-            brand,
-            price,
-            description,
-            category_id,
-            category,
-            image,
-        } = req.body;
-        const data = {
-            name: name,
-            brand: brand,
-            price: price,
-            description: description,
-            category_id: category_id,
-            category: category,
-            image: urlImagesString,
-            updatedAt: new Date(),
-        };
-        productModel
-            .updateProduct(id, data)
-            .then(() => {
-                for (var i = 0; i < myArr.length; i++) {
-                    fs.unlink(`${dirPath}/${myArr[i].substr(28)}`, (err) => {
-                        if (err) {
-                            console.log("Error unlink image product!" + err);
-                        }
-                    });
-                }
-
-                helpers.response(res, "Success update data", data, 200);
-            })
-            .catch((error) => {
-                console.log(error);
-                helpers.response(res, "Not found id product", null, 404);
+                            helpers.response(res, "Success update data", data, 200);
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            helpers.response(res, "Not found id product", null, 404);
+                            for (var i = 0; i < images.length; i++) {
+                                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                                    if (err) {
+                                        console.log("Error unlink image product!" + err);
+                                    }
+                                });
+                            }
+                        });
+                });
             });
+        });
     } else {
         helpers.response(res, "Not Autorized", null, 404);
     }
