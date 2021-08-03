@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const dirPath = path.join(__dirname, "../../uploads");
 const { v4: uuidv4 } = require("uuid");
-const { log } = require("console");
+
 
 const getAllUser = (req, res, next) => {
   if (req.role == 3) {
