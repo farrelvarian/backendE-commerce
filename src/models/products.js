@@ -18,7 +18,7 @@ const paginationProduct = (numPerPage, page, searchPage) => {
 const getAllProduct = (field, sort, limit, search) => {
     return new Promise((resolve, reject) => {
         connection.query(
-          `SELECT * FROM products INNER JOIN images ON products.image_id=images.id ${search} ORDER BY ${field} ${sort} LIMIT ${limit} `,
+          `SELECT * FROM products INNER JOIN images ON products.image_id=images.image_id ${search} ORDER BY ${field} ${sort} LIMIT ${limit} `,
           (error, result) => {
             if (!error) {
               resolve(result);
@@ -34,7 +34,7 @@ const getAllProduct = (field, sort, limit, search) => {
 const getProduct = (id) => {
     return new Promise((resolve, reject) => {
         connection.query(
-          "SELECT * FROM products INNER JOIN images ON products.image_id=images.id WHERE id = ?",
+          "SELECT * FROM products INNER JOIN images ON products.image_id=images.image_id WHERE products.id = ?",
           id,
           (error, result) => {
             if (!error) {
@@ -51,7 +51,7 @@ const getProduct = (id) => {
 const getProductByCategory = (category_id, field, sort) => {
     return new Promise((resolve, reject) => {
         connection.query(
-          `SELECT * FROM products INNER JOIN images ON products.image_id=images.id WHERE category_id = ? ORDER BY ${field} ${sort}`,
+          `SELECT * FROM products INNER JOIN images ON products.image_id=images.image_id WHERE products.category_id = ? ORDER BY ${field} ${sort}`,
           category_id,
           (error, result) => {
             if (!error) {
@@ -77,8 +77,8 @@ const insertImagesProduct = (dataImages) => {
 const getImagesProductIdInsert = () => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT id FROM `images` order BY id DESC LIMIT 1",
-      
+      "SELECT image_id FROM `images` order BY id DESC LIMIT 1",
+
       (error, result) => {
         if (!error) {
           resolve(result);
@@ -117,7 +117,7 @@ const getImagesProductIdUpdate = (id) => {
 const getImagesProduct = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT image1,image2,image3,image4,image5 FROM `images` WHERE id = ?",
+      "SELECT image1,image2,image3,image4,image5 FROM `images` WHERE image_id = ?",
       id,
       (error, result) => {
         if (!error) {
@@ -132,7 +132,7 @@ const getImagesProduct = (id) => {
 const updateImagesProduct = (id, dataImages) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "UPDATE images SET ? WHERE id = ?",
+      "UPDATE images SET ? WHERE image_id = ?",
       [dataImages, id],
       (error, result) => {
         if (!error) {

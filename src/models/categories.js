@@ -18,7 +18,7 @@ const paginationCategory = () => {
 const getAllCategory = (field, sort, limit, search) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      `SELECT * FROM categories INNER JOIN products ON categories.id=products.category_id ${search} ORDER BY categories.${field} ${sort} LIMIT ${limit}`,
+      `SELECT * FROM categories INNER JOIN products ON categories.category_id=products.category_id ${search} ORDER BY categories.${field} ${sort} LIMIT ${limit}`,
       (error, result) => {
         if (!error) {
           resolve(result);
@@ -33,7 +33,7 @@ const getAllCategory = (field, sort, limit, search) => {
 const getCategory = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT * FROM categories   WHERE id = ?",
+      "SELECT * FROM categories   WHERE category_id = ?",
       id,
       (error, result) => {
         if (!error) {
@@ -61,7 +61,7 @@ const insertCategory = (data) => {
 const updateCategory = (id, data) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "UPDATE categories SET ? WHERE id = ?",
+      "UPDATE categories SET ? WHERE category_id = ?",
       [data, id],
       (error, result) => {
         if (!error) {
@@ -77,7 +77,7 @@ const updateCategory = (id, data) => {
 const deleteCategory = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "DELETE FROM categories WHERE id = ?",
+      "DELETE FROM categories WHERE category_id = ?",
       id,
       (error, result) => {
         if (!error) {

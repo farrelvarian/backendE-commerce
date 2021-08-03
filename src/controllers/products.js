@@ -66,7 +66,7 @@ const getAllProduct = (req, res, next) => {
                 60 * 60,
                 JSON.stringify(responsePayload)
             );
-            // console.log("sdfsljfda;slsfkla;flkslk");
+
             helpers.response(res, "Success get data", responsePayload, 200);
         })
         .catch((error) => {
@@ -134,6 +134,7 @@ const insertProduct = (req, res, next) => {
             image4: urlImages[3] || null,
             image5: urlImages[4] || null,
         };
+
         productModel.insertImagesProduct(dataImages).then(() => {
             productModel.getImagesProductIdInsert().then((result) => {
                 const imageId = result[0].id;
@@ -150,7 +151,6 @@ const insertProduct = (req, res, next) => {
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 };
-
                 productModel
                     .insertProduct(data)
                     .then(() => {
@@ -180,6 +180,8 @@ const updateProduct = (req, res) => {
         const imageArr = [];
         const urlImages = [];
         const images = [];
+        let dataImages = {}
+        let deleteImages = []
         req.files.forEach((element) => {
             const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
             const filename = element.filename;
@@ -195,14 +197,27 @@ const updateProduct = (req, res) => {
                 imageArr.push(result[0].image3);
                 imageArr.push(result[0].image4);
                 imageArr.push(result[0].image5);
-                // console.log(imageArr);
-                const dataImages = {
-                    image1: urlImages[0] || null,
-                    image2: urlImages[1] || null,
-                    image3: urlImages[2] || null,
-                    image4: urlImages[3] || null,
-                    image5: urlImages[4] || null,
-                };
+                // console.log(urlImages.length);
+                if (urlImages.length < 1) {
+                    dataImages = {
+                        image1: imageArr[0] || null,
+                        image2: imageArr[1] || null,
+                        image3: imageArr[2] || null,
+                        image4: imageArr[3] || null,
+                        image5: imageArr[4] || null,
+                    };
+                } else {
+                    dataImages = {
+                        image1: urlImages[0] || null,
+                        image2: urlImages[1] || null,
+                        image3: urlImages[2] || null,
+                        image4: urlImages[3] || null,
+                        image5: urlImages[4] || null,
+                    };
+                    deleteImages = imageArr
+                }
+
+
                 productModel.updateImagesProduct(imageId, dataImages).then(() => {
                     const { name, brand, price, description, category_id, category } =
                     req.body;
@@ -219,12 +234,14 @@ const updateProduct = (req, res) => {
                     productModel
                         .updateProduct(id, data)
                         .then(() => {
-                            for (var i = 0; i < imageArr.length; i++) {
+                            for (var i = 0; i < deleteImages.length; i++) {
                                 fs.unlink(
-                                    `${dirPath}/${imageArr[i].substr(28)}`,
+                                    `${dirPath}/${deleteImages[i].substr(28)}`,
                                     (err) => {
                                         if (err) {
-                                            console.log("Error unlink image product!" + err);
+                                            console.log(
+                                                "Error unlink image product!" + err
+                                            );
                                         }
                                     }
                                 );

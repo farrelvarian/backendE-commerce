@@ -50,7 +50,7 @@ const hitCacheProductCategory = (req, res, next) => {
     });
 };
 const clearRedisProduct = (req, res, next) => {
-    client.del("flushall");
+    client.end("flush");
     next();
 };
 module.exports = {

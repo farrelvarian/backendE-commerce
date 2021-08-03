@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 
 const register = async(req, res, next) => {
 
-    const { name, email, password, phone, gender, dateOfBirth, role, address } =
+    const { name, email, password, phone, gender, dateOfBirth, role,store_name, address } =
     req.body;
 
     const user = await userModels.findUser(email);
@@ -20,18 +20,19 @@ const register = async(req, res, next) => {
             // Store hash in your password DB.
             console.log(hash);
             const data = {
-                id: uuidv4(),
-                name: name,
-                email: email,
-                password: hash,
-                phone: phone,
-                gender: gender,
-                dateOfBirth: dateOfBirth,
-                address: address,
-                role: role,
-                status: "UNACTIVED",
-                createdAt: new Date(),
-                updatedAt: new Date(),
+              id: uuidv4(),
+              name: name,
+              email: email,
+              password: hash,
+              phone: phone,
+              gender: gender,
+              dateOfBirth: dateOfBirth,
+              address: address,
+              role: role,
+              store_name: store_name,
+              status: "UNACTIVED",
+              createdAt: new Date(),
+              updatedAt: new Date(),
             };
 
 
@@ -39,7 +40,7 @@ const register = async(req, res, next) => {
                 .insertUser(data)
                 .then((result) => {
                     delete data.password;
-                    jwt.sign({ email: data.email },
+                    jwt.sign({ email: data.email,role:data.role },
                         process.env.SECRET_KEY, { expiresIn: "2h" },
                         function(err, token) {
                             console.log(token);
@@ -102,15 +103,19 @@ const activation = (req, res, next) => {
         error.code = 401;
         return next(error);
     }
-    console.log(token);
     jwt.verify(token, process.env.SECRET_KEY, function(err, decoded) {
         if (err) {
             helpers.response(res, "Activation failed", null, 401);
         }
         const email = decoded.email;
-        console.log(email);
+        const role = decoded.role;
         userModels.activationUser(email)
-            .then(() => { helpers.response(res, "success change status", email, 200); })
+            .then(() => {  
+                // alert(`Activation Sucessful`)                
+                res.redirect(`${process.env.FRONT_URL}/login/${role}`);
+                 })
+                
+                
             .catch((error) => {
                 helpers.response(res, "failed change status", null, 401)
             })
