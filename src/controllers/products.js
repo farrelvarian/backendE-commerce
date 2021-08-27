@@ -4,8 +4,8 @@ const fs = require("fs");
 const path = require("path");
 const createError = require("http-errors");
 const dirPath = path.join(__dirname, "../../uploads");
-const redis = require("redis");
-const client = redis.createClient();
+// const redis = require("redis");
+// const client = redis.createClient();
 
 const getAllProduct = (req, res, next) => {
     let numRows;
@@ -61,11 +61,11 @@ const getAllProduct = (req, res, next) => {
                         numPages,
                 };
             }
-            client.setex(
-                `products/${numPerPage}/${page}/${sort}/${paramSearch}`,
-                60 * 60,
-                JSON.stringify(responsePayload)
-            );
+            // client.setex(
+            //     `products/${numPerPage}/${page}/${sort}/${paramSearch}`,
+            //     60 * 60,
+            //     JSON.stringify(responsePayload)
+            // );
 
             helpers.response(res, "Success get data", responsePayload, 200);
         })
@@ -82,7 +82,7 @@ const getProduct = (req, res, next) => {
             .getProduct(id)
             .then((result) => {
                 const products = result;
-                client.setex(`product/${id}`, 60 * 60, JSON.stringify(products));
+                // client.setex(`product/${id}`, 60 * 60, JSON.stringify(products));
                 helpers.response(res, "Success get data", products, 200);
             })
             .catch((error) => {
@@ -103,11 +103,11 @@ const getProductByCategory = (req, res, next) => {
         .getProductByCategory(category_id, field, sort)
         .then((result) => {
             const products = result;
-            client.setex(
-                `product/${category_id}/${field}/${sort}`,
-                60 * 60,
-                JSON.stringify(products)
-            );
+            // client.setex(
+            //     `product/${category_id}/${field}/${sort}`,
+            //     60 * 60,
+            //     JSON.stringify(products)
+            // ); 
             helpers.response(res, "Success get data", products, 200);
         })
         .catch((error) => {
@@ -137,7 +137,7 @@ const insertProduct = (req, res, next) => {
 
         productModel.insertImagesProduct(dataImages).then(() => {
             productModel.getImagesProductIdInsert().then((result) => {
-                const imageId = result[0].id;
+                const imageId = result[0].image_id;
                 const { name, brand, price, description, category_id, category } =
                 req.body;
                 const data = {

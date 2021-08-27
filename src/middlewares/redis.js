@@ -1,6 +1,6 @@
-const redis = require("redis");
-const client = redis.createClient(6379);
-const helpers = require("../helpers/helpers");
+// const redis = require("redis");
+// const client = redis.createClient(6379);
+// const helpers = require("../helpers/helpers");
 
 const hitCacheAllProduct = (req, res, next) => {
     const numPerPage = parseInt(req.query.npp) || 15;
@@ -50,8 +50,8 @@ const hitCacheProductCategory = (req, res, next) => {
     });
 };
 const clearRedisProduct = (req, res, next) => {
-    client.end("flush");
-    next();
+   client.flushall("ASYNC", next());
+
 };
 module.exports = {
     hitCacheAllProduct,
