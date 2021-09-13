@@ -55,7 +55,7 @@ const updateOrder = (id, data) => {
   })
 }
 
-const deleteOrder = (data) => {
+const deleteOrder = (id) => {
   return new Promise((resolve, reject) => {
     connection.query('DELETE FROM orders WHERE id = ?', id, (error, result) => {
       if (!error) {

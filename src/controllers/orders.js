@@ -6,13 +6,11 @@ const getAllOrder = (req, res, next) => {
     .getAllOrder()
     .then((result) => {
       const orders = result
-      helpers.response(res, orders, 200)
+      helpers.response(res, 'Success get data', orders, 200)
     })
     .catch((error) => {
       console.log(error)
-      helpers.response(res, null, 500, {
-        message: 'internal server error'
-      })
+      helpers.response(res, 'Not found order', null, 404)
     })
 }
 
@@ -22,13 +20,12 @@ const getOrder = (req, res, next) => {
     .getOrder(id)
     .then((result) => {
       const orders = result
-      helpers.response(res, orders, 200)
+      helpers.response(res, 'Success get data', orders, 200)
     })
     .catch((error) => {
       console.log(error)
-      helpers.response(res, null, 500, {
-        message: 'internal server error'
-      })
+      const err = new createError.InternalServerError()
+      next(err)
     })
 }
 
@@ -46,13 +43,11 @@ const insertOrder = (req, res, next) => {
   orderModel
     .insertOrder(data)
     .then(() => {
-      helpers.response(res, data, 200)
+      helpers.response(res, 'Success insert data', data, 200)
     })
     .catch((error) => {
       console.log(error)
-      helpers.response(res, null, 500, {
-        message: 'internal server error'
-      })
+      helpers.response(res, 'Not found id order', null, 404)
     })
 }
 const updateOrder = (req, res) => {
@@ -68,13 +63,11 @@ const updateOrder = (req, res) => {
   orderModel
     .updateOrder(id, data)
     .then(() => {
-      helpers.response(res, data, 200)
+      helpers.response(res, 'Success update data', data, 200)
     })
     .catch((error) => {
       console.log(error)
-      helpers.response(res, null, 500, {
-        message: 'internal server error'
-      })
+      helpers.response(res, 'Not found id order', null, 404)
     })
 }
 const deleteOrder = (req, res) => {
@@ -82,13 +75,11 @@ const deleteOrder = (req, res) => {
   orderModel
     .deleteOrder(id)
     .then(() => {
-      helpers.response(res, data, 200)
+      helpers.response(res, 'Success delete data', id, 200)
     })
     .catch((err) => {
       console.log(err)
-      helpers.response(res, null, 500, {
-        message: 'internal server error'
-      })
+      helpers.response(res, 'Not found id order', null, 404)
     })
 }
 

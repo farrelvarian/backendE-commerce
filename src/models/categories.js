@@ -1,99 +1,100 @@
-const connection = require('../configs/db')
+const connection = require("../configs/db");
 
-const paginationProduct = () => {
+const paginationCategory = () => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'SELECT count(*) as numRows FROM categories',
+      "SELECT count(*) as numRows FROM categories",
       (error, result) => {
         if (!error) {
-          resolve(result)
+          resolve(result);
         } else {
-          reject(error)
+          reject(error);
         }
       }
-    )
-  })
-}
+    );
+  });
+};
 
 const getAllCategory = (field, sort, limit, search) => {
   return new Promise((resolve, reject) => {
     connection.query(
-            `SELECT * FROM categories INNER JOIN products ON categories.id=products.category_id ${search} ORDER BY categories.${field} ${sort} LIMIT ${limit}`,
-            (error, result) => {
-              if (!error) {
-                resolve(result)
-              } else {
-                reject(error)
-              }
-            }
-    )
-  })
-}
+      `SELECT * FROM categories INNER JOIN products ON categories.category_id=products.category_id ${search} ORDER BY categories.${field} ${sort} LIMIT ${limit}`,
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
 
 const getCategory = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'SELECT * FROM categories  WHERE id = ?',
+      "SELECT * FROM categories   WHERE category_id = ?",
       id,
       (error, result) => {
         if (!error) {
-          resolve(result)
+          resolve(result);
         } else {
-          reject(error)
+          reject(error);
         }
       }
-    )
-  })
-}
+    );
+  });
+};
 
 const insertCategory = (data) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO categories SET ?', data, (error, result) => {
+    connection.query("INSERT INTO categories SET ?", data, (error, result) => {
       if (!error) {
-        resolve(result)
+        resolve(result);
       } else {
-        reject(error)
+        reject(error);
       }
-    })
-  })
-}
+    });
+  });
+};
 
 const updateCategory = (id, data) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'UPDATE categories SET ? WHERE id = ?', [data, id],
+      "UPDATE categories SET ? WHERE category_id = ?",
+      [data, id],
       (error, result) => {
         if (!error) {
-          resolve(result)
+          resolve(result);
         } else {
-          reject(error)
+          reject(error);
         }
       }
-    )
-  })
-}
+    );
+  });
+};
 
 const deleteCategory = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'DELETE FROM categories WHERE id = ?',
+      "DELETE FROM categories WHERE category_id = ?",
       id,
       (error, result) => {
         if (!error) {
-          resolve(result)
+          resolve(result);
         } else {
-          reject(error)
+          reject(error);
         }
       }
-    )
-  })
-}
+    );
+  });
+};
 
 module.exports = {
-  paginationProduct,
+  paginationCategory,
   getAllCategory,
   getCategory,
   insertCategory,
   updateCategory,
-  deleteCategory
-}
+  deleteCategory,
+};

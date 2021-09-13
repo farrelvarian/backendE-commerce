@@ -1,7 +1,7 @@
-const response = (res, result, status, error) => {
+const response = (res, message, result, status, error) => {
   const resultPrint = {}
-  resultPrint.status = 'success'
-  resultPrint.statusCode = status
+  resultPrint.status = status || 200
+  resultPrint.message = message || null
   resultPrint.data = result
   resultPrint.error = error || null
   res.status(status).json(resultPrint)

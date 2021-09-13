@@ -55,7 +55,7 @@ const updatePayment = (id, data) => {
   })
 }
 
-const deletePayment = (data) => {
+const deletePayment = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
       'DELETE FROM Payments WHERE id = ?',
