@@ -18,8 +18,8 @@ const setCors = require("./src/middlewares/cors")
 app.use(bodyParser.json())
     // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan('dev'))
-app.use(setCors())
 app.use(cors());
+app.use(setCors())
 
 
 app.use('/products', productRouter)
