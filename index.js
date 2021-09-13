@@ -12,13 +12,13 @@ const morgan = require('morgan')
 const PORT = process.env.PORT || 3500
 const cors = require('cors')
 const createError = require('http-errors')
-
+const setCors = require("./src/middlewares/cors")
 // middleware
 
 app.use(bodyParser.json())
     // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan('dev'))
-app.use(cors())
+app.use(cors(setCors));
 
 app.use('/products', productRouter)
 app.use('/users', userRouter)
