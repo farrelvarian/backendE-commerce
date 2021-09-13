@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-const emailTemplate = require("./emailTemplate.js");
 
 const sendEmail = (toEmail, toName, token) => {
     // create reusable transporter object using the default SMTP transport
