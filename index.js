@@ -19,7 +19,18 @@ app.use(bodyParser.json())
     // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(morgan('dev'))
 app.use(cors());
-app.use(setCors())
+app.use((_, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  ); // If needed
+  res.header(
+    "Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  ); // If needed
+  res.header("Access-Control-Allow-Credentials", true); // If needed
+  next();
+});
 
 
 app.use('/products', productRouter)
