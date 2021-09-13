@@ -9,7 +9,7 @@ const orderRouter = require('./src/routes/orders')
 const paymentRouter = require('./src/routes/payments')
 const userAuthRouter = require("./src/routes/userAuth");
 const morgan = require('morgan')
-const port = process.env.DB_PORT || 3500
+const PORT = process.env.PORT || 3500
 const cors = require('cors')
 const createError = require('http-errors')
 
@@ -40,6 +40,6 @@ app.use((err, req, res, next) => {
     })
 })
 
-app.listen(port, () => {
-    console.log(`server is running on port ${port}`)
-})
+app.listen(PORT, () => {
+  console.log(`server is running on port ${PORT}`);
+});
