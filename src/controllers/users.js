@@ -144,7 +144,7 @@ const updateUser = (req, res) => {
           if (avatar === oldImageUser) {
             console.log("no change on image!");
           } else {
-            fs.unlink(`${dirPath}/${oldImageUser.substr(28)}`, (err) => {
+            fs.unlink(`${dirPath}/${oldImageUser.substr(39)}`, (err) => {
               if (err) {
                 console.log("Error unlink image product!" + err);
               }

@@ -236,7 +236,7 @@ const updateProduct = (req, res) => {
                         .then(() => {
                             for (var i = 0; i < deleteImages.length; i++) {
                                 fs.unlink(
-                                    `${dirPath}/${deleteImages[i].substr(28)}`,
+                                    `${dirPath}/${deleteImages[i].substr(39)}`,
                                     (err) => {
                                         if (err) {
                                             console.log(
