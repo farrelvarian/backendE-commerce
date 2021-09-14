@@ -1,6 +1,6 @@
 <h1 align="center">ExpressJS - #backend-E-Commerce RESTfull API</h1>
 
-Coffee Shop is a store that sells some good meals, and especially coffee. We provide high quality beans
+E-commerce website focus on fashion that brings together sellers and customers. It has search, sort, product detail and my bag features for customers as well as add, update and delete products for sellers. Built using ReactJS, ExpressJS and MySQL.
 
 ## Built With
 
