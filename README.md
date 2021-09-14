@@ -1,11 +1,17 @@
 <h1 align="center">ExpressJS - #backend-E-Commerce RESTfull API</h1>
 
+
 E-commerce website focus on fashion that brings together sellers and customers. It has search, sort, product detail and my bag features for customers as well as add, update and delete products for sellers. Built using ReactJS, ExpressJS and MySQL.
 
 ## Built With
 
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-orange.svg?style=rounded-square)](https://expressjs.com/en/starter/installing.html)
 [![Node.js](https://img.shields.io/badge/Node.js-v.12.13-green.svg?style=rounded-square)](https://nodejs.org/)
+
+## Database Schema
+<p align='center'>
+  <span>
+      <image src='./screenshot/db.PNG' />
 
 ## Requirements
 
@@ -41,4 +47,4 @@ Open .env file on your favorite code editor, and copy paste this code below :
     BLANJA_PASS
 ## License
 
-© [Farrel Varian Eka Putra](https://github.com/farrelvarian/E-commerce-React)
+© [Farrel Varian Eka Putra](https://github.com/farrelvarian/)
