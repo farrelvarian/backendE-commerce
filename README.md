@@ -1,4 +1,4 @@
-<h1 align="center">ExpressJS - #backend-CoffeeShop RESTfull API</h1>
+<h1 align="center">ExpressJS - #backend-E-Commerce RESTfull API</h1>
 
 Coffee Shop is a store that sells some good meals, and especially coffee. We provide high quality beans
 
