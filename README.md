@@ -4,10 +4,15 @@
 E-commerce website focus on fashion that brings together sellers and customers. It has search, sort, product detail and my bag features for customers as well as add, update and delete products for sellers. Built using ReactJS, ExpressJS and MySQL.
 
 <p align='center'>
+   ·
 <a href="https://flamboyant-thompson-4937cf.netlify.app/">Preview Website</a>
+   ·
 <a href="https://blanja-e-commerce.herokuapp.com/">Rest API</a> 
+   ·
 <a href="https://github.com/farrelvarian/E-commerce-React">Repository Frontend</a> 
+   ·
 <a href="https://github.com/farrelvarian/backendE-commerce">Repository Backend</a> 
+   · 
 
 
 ## Built With
