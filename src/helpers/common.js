@@ -3,11 +3,13 @@ const nodemailer = require("nodemailer");
 const sendEmail = (toEmail, toName, token) => {
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-            user: process.env.BLANJA_EMAIL, // generated ethereal user
-            pass: process.env.BLANJA_PASS, // generated ethereal password
-        },
+      host: process.env.BLANJA_HOST,
+      port: process.env.BLANJA_PORT,
+      secure: process.env.BLANJA_SECURE,
+      auth: {
+        user: process.env.BLANJA_EMAIL, // generated ethereal user
+        pass: process.env.BLANJA_PASS, // generated ethereal password
+      },
     });
     transporter
         .sendMail({
