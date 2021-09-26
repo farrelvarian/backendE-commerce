@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const dirPath = path.join(__dirname, "../../uploads");
 const { v4: uuidv4 } = require("uuid");
+const { cloudinary } = require("../middlewares/cloudinary");
 
 
 const getAllUser = (req, res, next) => {
@@ -92,7 +93,7 @@ const insertUser = (req, res, next) => {
   }
 };
 
-const updateUser = (req, res) => {
+const updateUser = async(req, res) => {
   if (req.role == 3 || req.role == 2 || req.role == 1) {
     const id = req.params.id;
     let avatar = "";
@@ -101,13 +102,15 @@ const updateUser = (req, res) => {
     if (!req.file) {
       imageUserInput = "";
     } else {
-      imageUserInput = req.file.filename;
+       imageUserInput = req.file.path;
+       const imageCloudinary = await cloudinary.uploader.upload(imageUserInput);
+       imageUserInput = imageCloudinary.secure_url;
     }
 
     userModel.getUser(id).then((result) => {
       const oldImageUser = result[0].image;
 
-      const newImageUser = `${process.env.BASE_URL}/files/${imageUserInput}`;
+      const newImageUser = imageCloudinary.secure_url;
       const {
         name,
         email,
@@ -144,21 +147,21 @@ const updateUser = (req, res) => {
           if (avatar === oldImageUser) {
             console.log("no change on image!");
           } else {
-            fs.unlink(`${dirPath}/${oldImageUser.substr(39)}`, (err) => {
-              if (err) {
-                console.log("Error unlink image product!" + err);
-              }
-            });
+          //   fs.unlink(`${dirPath}/${oldImageUser.substr(39)}`, (err) => {
+          //     if (err) {
+          //       console.log("Error unlink image product!" + err);
+          //     }
+          //   });
           }
         })
         .catch((error) => {
           console.log(error);
           helpers.response(res, "Not found id user", null, 404);
-          fs.unlink(`${dirPath}/${imageUserInput}`, (err) => {
-            if (err) {
-              console.log("Error unlink image product!" + err);
-            }
-          });
+          // fs.unlink(`${dirPath}/${imageUserInput}`, (err) => {
+          //   if (err) {
+          //     console.log("Error unlink image product!" + err);
+          //   }
+          // });
         });
     });
   } else {

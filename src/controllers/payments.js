@@ -1,43 +1,127 @@
 const paymentModel = require('../models/payments')
 const helpers = require('../helpers/helpers')
+const short = require("short-uuid");
 
 const getAllPayment = (req, res, next) => {
+    let numRows;
+    const numPerPage = parseInt(req.query.npp) || 5;
+    const page = parseInt(req.query.page) || 1;
+    let numPages;
+    const skip = (page - 1) * numPerPage;
+    const field = req.query.field || "createdAt";
+    const sort = req.query.sort || "DESC";
+    
+     paymentModel
+       .paginationPayment(numPerPage, page)
+       .then((result) => {
+         numRows = result[0].numRows;
+         numPages = Math.ceil(numRows / numPerPage);
+         console.log("number per pages:", numPerPage);
+         console.log("number of pages:", numPages);
+         console.log("total pages:", numRows);
+       });
+
+    // Here we compute the LIMIT parameter for MySQL query
+    const limit = skip + "," + numPerPage;
   paymentModel
-    .getAllPayment()
+    .getAllPayment(field, sort, limit)
     .then((result) => {
-      const payments = result
-      helpers.response(res, 'Success get data', payments, 200)
+       const responsePayload = {
+         result: result,
+       };
+       if (page <= numPages) {
+         responsePayload.pagination = {
+           totalData: numRows,
+           current: page,
+           totalPages: numPages,
+           perPage: numPerPage,
+           previous: page > 1 ? page - 1 : undefined,
+           next: page < numPages ? page + 1 : undefined,
+           sortBy: field,
+           orderBy: sort,
+         };
+       } else {
+         responsePayload.pagination = {
+           err:
+             "queried page " +
+             page +
+             " is >= to maximum page number " +
+             numPages,
+         };
+       }
+      helpers.response(res, "Success get data", responsePayload, 200);
     })
     .catch((error) => {
-      console.log(error)
-      helpers.response(res, 'Not found payment', null, 404)
-    })
+      console.log(error);
+      helpers.response(res, "Not found payment", null, 404);
+    });
 }
 
 const getPayment = (req, res, next) => {
   const id = req.params.id
+   let numRows;
+   const numPerPage = parseInt(req.query.npp) || 5;
+   const page = parseInt(req.query.page) || 1;
+   let numPages;
+   const skip = (page - 1) * numPerPage;
+   const field = req.query.field || "createdAt";
+   const sort = req.query.sort || "DESC";
+   paymentModel
+     .paginationPayment(numPerPage, page,id)
+     .then((result) => {
+       numRows = result[0].numRows;
+       numPages = Math.ceil(numRows / numPerPage);
+       console.log("number per pages:", numPerPage);
+       console.log("number of pages:", numPages);
+       console.log("total pages:", numRows);
+     });
+
+   // Here we compute the LIMIT parameter for MySQL query
+   const limit = skip + "," + numPerPage;
   paymentModel
-    .getPayment(id)
+    .getPayment(id, field, sort, limit)
     .then((result) => {
-      const payments = result
-      helpers.response(res, 'Success get data', payments, 200)
+      const responsePayload = {
+        result: result,
+      };
+      if (page <= numPages) {
+        responsePayload.pagination = {
+          totalData: numRows,
+          current: page,
+          totalPages: numPages,
+          perPage: numPerPage,
+          previous: page > 1 ? page - 1 : undefined,
+          next: page < numPages ? page + 1 : undefined,
+          sortBy: field,
+          orderBy: sort,
+        };
+      } else {
+        responsePayload.pagination = {
+          err:
+            "queried page " +
+            page +
+            " is >= to maximum page number " +
+            numPages,
+        };
+      }
+      helpers.response(res, "Success get data", responsePayload, 200);
     })
     .catch((error) => {
-      console.log(error)
-      const err = new createError.InternalServerError()
-      next(err)
-    })
+      console.log(error);
+      helpers.response(res, "Not found payment", null, 404);
+    });
 }
 
 const insertPayment = (req, res, next) => {
-  const { user_id, order_id, payment_method } = req.body
+  const id = short.generate();
+  const { user_id, payment_method,total } = req.body
   const data = {
+    id: id,
     user_id: user_id,
-    order_id: order_id,
     payment_method: payment_method,
+    total:total,
     createdAt: new Date(),
-    updatedAt: new Date()
-  }
+  };
 
   paymentModel
     .insertPayment(data)
@@ -51,13 +135,14 @@ const insertPayment = (req, res, next) => {
 }
 const updatePayment = (req, res) => {
   const id = req.params.id
-  const { user_id, order_id, payment_method } = req.body
+  const { user_id, order_id, payment_method, total } = req.body;
   const data = {
     user_id: user_id,
     order_id: order_id,
     payment_method: payment_method,
-    updatedAt: new Date()
-  }
+    total: total,
+    updatedAt: new Date(),
+  };
   paymentModel
     .updatePayment(id, data)
     .then(() => {

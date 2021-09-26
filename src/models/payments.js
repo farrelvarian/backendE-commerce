@@ -1,32 +1,53 @@
 const connection = require('../configs/db')
 
-const getAllPayment = () => {
-  return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM payments', (error, result) => {
-      if (!error) {
-        resolve(result)
-      } else {
-        reject(error)
-      }
-    })
-  })
-}
-
-const getPayment = (id) => {
+const paginationPayment = (numPerPage, page,id) => {
+  let paramId = "";
+  if(id){paramId = `WHERE user_id = '${id}'`;}
+  console.log(paramId);
   return new Promise((resolve, reject) => {
     connection.query(
-      'SELECT * FROM payments  WHERE id = ?',
-      id,
+      `SELECT count(*) as numRows FROM payments ${paramId} `,
       (error, result) => {
         if (!error) {
-          resolve(result)
+          resolve(result);
         } else {
-          reject(error)
+          reject(error);
         }
       }
-    )
-  })
-}
+    );
+  });
+};
+
+const getAllPayment = (field, sort, limit) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT payments.id,payments.user_id,payments.createdAt,payments.total,users.name FROM payments INNER JOIN users ON payments.user_id=users.id  ORDER BY payments.${field} ${sort} LIMIT ${limit} `,
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
+
+const getPayment = (id, field, sort, limit) => {
+
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT payments.id,payments.user_id,payments.createdAt,payments.total,users.name FROM payments INNER JOIN users ON payments.user_id=users.id WHERE user_id = '${id}' ORDER BY payments.${field} ${sort} LIMIT ${limit}`,
+      (error, result) => {
+        if (!error) {
+          resolve(result);
+        } else {
+          reject(error);
+        }
+      }
+    );
+  });
+};
 
 const insertPayment = (data) => {
   return new Promise((resolve, reject) => {
@@ -72,6 +93,7 @@ const deletePayment = (id) => {
 }
 
 module.exports = {
+  paginationPayment,
   getAllPayment,
   getPayment,
   insertPayment,

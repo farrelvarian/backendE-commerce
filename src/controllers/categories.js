@@ -66,8 +66,7 @@ const getCategory = (req, res, next) => {
         })
         .catch((error) => {
             console.log(error);
-            const err = new createError.InternalServerError();
-            next(err);
+           helpers.response(res, "Not found category", null, 404);
         });
 };
 

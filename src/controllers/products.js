@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const createError = require("http-errors");
 const dirPath = path.join(__dirname, "../../uploads");
+const { cloudinary } = require("../middlewares/cloudinary");
 // const redis = require("redis");
 // const client = redis.createClient();
 
@@ -87,8 +88,7 @@ const getProduct = (req, res, next) => {
             })
             .catch((error) => {
                 console.log(error);
-                const err = new createError.InternalServerError();
-                next(err);
+                helpers.response(res, "Not found product", null, 404);
             });
     } else {
         helpers.response(res, "Not Autorized", null, 404);
@@ -112,20 +112,19 @@ const getProductByCategory = (req, res, next) => {
         })
         .catch((error) => {
             console.log(error);
-            const err = new createError.InternalServerError();
-            next(err);
+            helpers.response(res, "Not found product", null, 404);
         });
 };
 
-const insertProduct = (req, res, next) => {
+const insertProduct = async(req, res, next) => {
     if (req.role == 2) {
         const urlImages = [];
-        const images = [];
-        req.files.forEach((element) => {
-            const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
-            const filename = element.filename;
-            urlImages.push(urlFileName);
-            images.push(filename);
+        // const images = [];
+        req.files.forEach(async(element) => {
+            const filename = element.path;
+            const imageCloudinary = await cloudinary.uploader.upload(filename);
+            urlImages.push(imageCloudinary.secure_url);
+            // images.push(filename);
         });
         const dataImages = {
             image1: urlImages[0] || null,
@@ -138,7 +137,7 @@ const insertProduct = (req, res, next) => {
         productModel.insertImagesProduct(dataImages).then(() => {
             productModel.getImagesProductIdInsert().then((result) => {
                 const imageId = result[0].image_id;
-                const { name, brand, price, description, category_id, category } =
+                const { name, brand, price, description, category_id, category, color, size, quantity, status } =
                 req.body;
                 const data = {
                     name: name,
@@ -147,9 +146,12 @@ const insertProduct = (req, res, next) => {
                     description: description,
                     category_id: category_id,
                     category: category,
+                    color: color,
+                    size: size,
+                    quantity: quantity,
+                    status: status,
                     image_id: imageId,
                     createdAt: new Date(),
-                    updatedAt: new Date(),
                 };
                 productModel
                     .insertProduct(data)
@@ -159,13 +161,13 @@ const insertProduct = (req, res, next) => {
                     .catch((error) => {
                         console.log(error);
                         helpers.response(res, "Not found id product", null, 404);
-                        for (var i = 0; i < images.length; i++) {
-                            fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                                if (err) {
-                                    console.log("Error unlink image product!" + err);
-                                }
-                            });
-                        }
+                        // for (var i = 0; i < images.length; i++) {
+                        //     fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                        //         if (err) {
+                        //             console.log("Error unlink image product!" + err);
+                        //         }
+                        //     });
+                        // }
                     });
             });
         });
@@ -173,20 +175,21 @@ const insertProduct = (req, res, next) => {
         helpers.response(res, "Not Autorized", null, 404);
     }
 };
-const updateProduct = (req, res) => {
+const updateProduct = async(req, res) => {
     if (req.role == 2) {
         const id = req.params.id;
 
         const imageArr = [];
         const urlImages = [];
         const images = [];
-        let dataImages = {}
-        let deleteImages = []
-        req.files.forEach((element) => {
-            const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
-            const filename = element.filename;
-            urlImages.push(urlFileName);
-            images.push(filename);
+        let dataImages = {};
+        let deleteImages = [];
+        req.files.forEach(async(element) => {
+            // const urlFileName = `${process.env.BASE_URL}/files/${element.filename}`;
+            const filename = element.path;
+            const imageCloudinary = await cloudinary.uploader.upload(filename);
+            urlImages.push(imageCloudinary.secure_url);
+            // images.push(filename);
         });
         productModel.getImagesProductIdUpdate(id).then((result) => {
             const imageId = result[0].image_id;
@@ -214,13 +217,22 @@ const updateProduct = (req, res) => {
                         image4: urlImages[3] || null,
                         image5: urlImages[4] || null,
                     };
-                    deleteImages = imageArr
+                    deleteImages = imageArr;
                 }
 
-
                 productModel.updateImagesProduct(imageId, dataImages).then(() => {
-                    const { name, brand, price, description, category_id, category } =
-                    req.body;
+                    const {
+                        name,
+                        brand,
+                        price,
+                        description,
+                        category_id,
+                        category,
+                        color,
+                        size,
+                        quantity,
+                        status,
+                    } = req.body;
                     const data = {
                         name: name,
                         brand: brand,
@@ -228,37 +240,41 @@ const updateProduct = (req, res) => {
                         description: description,
                         category_id: category_id,
                         category: category,
+                        color: color,
+                        size: size,
+                        quantity: quantity,
+                        status: status,
                         image_id: imageId,
                         updatedAt: new Date(),
                     };
                     productModel
                         .updateProduct(id, data)
                         .then(() => {
-                            for (var i = 0; i < deleteImages.length; i++) {
-                                fs.unlink(
-                                    `${dirPath}/${deleteImages[i].substr(39)}`,
-                                    (err) => {
-                                        if (err) {
-                                            console.log(
-                                                "Error unlink image product!" + err
-                                            );
-                                        }
-                                    }
-                                );
-                            }
+                            // for (var i = 0; i < deleteImages.length; i++) {
+                            //     fs.unlink(
+                            //         `${dirPath}/${deleteImages[i].substr(39)}`,
+                            //         (err) => {
+                            //             if (err) {
+                            //                 console.log(
+                            //                     "Error unlink image product!" + err
+                            //                 );
+                            //             }
+                            //         }
+                            //     );
+                            // }
 
                             helpers.response(res, "Success update data", data, 200);
                         })
                         .catch((error) => {
                             console.log(error);
                             helpers.response(res, "Not found id product", null, 404);
-                            for (var i = 0; i < images.length; i++) {
-                                fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                                    if (err) {
-                                        console.log("Error unlink image product!" + err);
-                                    }
-                                });
-                            }
+                            // for (var i = 0; i < images.length; i++) {
+                            //     fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                            //         if (err) {
+                            //             console.log("Error unlink image product!" + err);
+                            //         }
+                            //     });
+                            // }
                         });
                 });
             });
@@ -278,13 +294,13 @@ const deleteProduct = (req, res) => {
             .catch((err) => {
                 console.log(err);
                 helpers.response(res, "Not found id product", null, 404);
-                for (var i = 0; i < images.length; i++) {
-                    fs.unlink(`${dirPath}/${images[i]}`, (err) => {
-                        if (err) {
-                            console.log("Error unlink image product!" + err);
-                        }
-                    });
-                }
+                // for (var i = 0; i < images.length; i++) {
+                //     fs.unlink(`${dirPath}/${images[i]}`, (err) => {
+                //         if (err) {
+                //             console.log("Error unlink image product!" + err);
+                //         }
+                //     });
+                // }
             });
     } else {
         helpers.response(res, "Not Autorized", null, 404);

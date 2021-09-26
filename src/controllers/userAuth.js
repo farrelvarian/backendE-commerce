@@ -60,6 +60,9 @@ const register = async(req, res, next) => {
 const login = async(req, res, next) => {
     const { email, password } = req.body;
     const result = await userModels.findUser(email);
+    if (result.length === 0) {
+      return helpers.response(res, "account registered yet", null, 401);
+    }
     const user = result[0];
     const role = user.role
     const status = user.status;

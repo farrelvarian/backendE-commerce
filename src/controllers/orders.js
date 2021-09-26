@@ -24,21 +24,20 @@ const getOrder = (req, res, next) => {
     })
     .catch((error) => {
       console.log(error)
-      const err = new createError.InternalServerError()
-      next(err)
+     helpers.response(res, "Not found order", null, 404);
     })
 }
 
 const insertOrder = (req, res, next) => {
-  const { product_id, size, color, quantity } = req.body
+  const { product_id, size, color, quantity, payment_id } = req.body;
   const data = {
     product_id: product_id,
+    payment_id:payment_id,
     size: size,
     color: color,
     quantity: quantity,
     createdAt: new Date(),
-    updatedAt: new Date()
-  }
+  };
 
   orderModel
     .insertOrder(data)
@@ -52,14 +51,15 @@ const insertOrder = (req, res, next) => {
 }
 const updateOrder = (req, res) => {
   const id = req.params.id
-  const { product_id, size, color, quantity } = req.body
+  const { product_id, size, color, quantity, payment_id } = req.body;
   const data = {
     product_id: product_id,
     size: size,
     color: color,
     quantity: quantity,
-    updatedAt: new Date()
-  }
+    payment_id: payment_id,
+    updatedAt: new Date(),
+  };
   orderModel
     .updateOrder(id, data)
     .then(() => {
